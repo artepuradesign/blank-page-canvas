@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { Heart, Share2, ChevronLeft, ChevronRight, Check, Star, MapPin, CreditCard, ChevronRight as ArrowRight, Loader2 } from "lucide-react";
+import { Heart, Share2, ChevronLeft, ChevronRight, Check, Star, MapPin, CreditCard, ChevronRight as ArrowRight, Loader2, Minus, Plus } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
@@ -10,16 +10,22 @@ import { useCart } from "@/hooks/useCart";
 import { useApiProduct } from "@/hooks/useApiProducts";
 import { useProductVariations } from "@/hooks/useProductVariations";
 import { toast } from "sonner";
+import { decodeProductHash, isProductHash } from "@/lib/productHash";
+import { generateProductSpecs } from "@/lib/iphoneSpecs";
 
 const Produto = () => {
-  const { id } = useParams();
+  const { id: rawId } = useParams();
   const navigate = useNavigate();
   const [currentImage, setCurrentImage] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
   const [cep, setCep] = useState("");
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [selectedCapacity, setSelectedCapacity] = useState<string | null>(null);
+  const [quantity, setQuantity] = useState(1);
   const { addToCart } = useCart();
+  
+  // Decodifica o hash para obter o ID real
+  const id = rawId && isProductHash(rawId) ? decodeProductHash(rawId) || rawId : rawId;
   
   const { data: product, isLoading, error } = useApiProduct(id || '');
   const { data: variations } = useProductVariations(id || '');
@@ -58,6 +64,15 @@ const Produto = () => {
   const currentVariation = getCurrentVariation();
   const currentPrice = currentVariation?.price || product?.price || 0;
   const currentStock = currentVariation?.stock ?? product?.stock ?? 0;
+
+  // Reset quantity when stock changes
+  useEffect(() => {
+    if (quantity > currentStock && currentStock > 0) {
+      setQuantity(currentStock);
+    } else if (currentStock > 0 && quantity === 0) {
+      setQuantity(1);
+    }
+  }, [currentStock]);
 
   // Check if a capacity is available for the selected color
   const isCapacityAvailableForColor = (capacity: string) => {
@@ -405,6 +420,33 @@ const Produto = () => {
               </div>
             )}
 
+            {/* Quantity Selector */}
+            {currentStock > 0 && (
+              <div className="space-y-3">
+                <p className="text-sm font-medium text-foreground">Quantidade</p>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                    disabled={quantity <= 1}
+                    className="w-10 h-10 flex items-center justify-center border border-border rounded-lg hover:bg-secondary disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <Minus className="w-4 h-4" />
+                  </button>
+                  <span className="w-12 text-center font-medium text-lg">{quantity}</span>
+                  <button
+                    onClick={() => setQuantity(q => Math.min(currentStock, q + 1))}
+                    disabled={quantity >= currentStock}
+                    className="w-10 h-10 flex items-center justify-center border border-border rounded-lg hover:bg-secondary disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                  <span className="text-sm text-muted-foreground">
+                    ({currentStock} disponíveis)
+                  </span>
+                </div>
+              </div>
+            )}
+
             {/* Desktop Add to Cart Button */}
             <div className="hidden lg:flex gap-3 pt-4">
               <Button 
@@ -433,11 +475,16 @@ const Produto = () => {
         </div>
 
         {/* Specifications Section */}
-        {product.specs && product.specs.length > 0 && (
+        {product && (
           <div className="mt-12 pt-8 border-t border-border">
             <h2 className="text-xl font-semibold mb-6">Especificações</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {product.specs.map((spec) => (
+              {generateProductSpecs(
+                product.name,
+                product.specs || [],
+                selectedCapacity,
+                selectedColor
+              ).map((spec) => (
                 <div key={spec.label} className="space-y-1">
                   <dt className="text-sm text-muted-foreground">{spec.label}</dt>
                   <dd className="font-medium">{spec.value}</dd>

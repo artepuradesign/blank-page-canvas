@@ -1,8 +1,10 @@
 import { Star } from "lucide-react";
 import { Link } from "react-router-dom";
+import { encodeProductId } from "@/lib/productHash";
 
 interface ProductCardProps {
   id?: number | string;
+  slug?: string;
   image: string;
   name: string;
   oldPrice: number;
@@ -15,6 +17,7 @@ interface ProductCardProps {
 
 const ProductCard = ({
   id = 1,
+  slug,
   image,
   name,
   oldPrice,
@@ -24,6 +27,9 @@ const ProductCard = ({
   condition,
   rating = 4,
 }: ProductCardProps) => {
+  // Usa slug se disponível, senão gera hash do ID
+  const productUrl = slug ? `/produto/${slug}` : `/produto/${encodeProductId(id)}`;
+
   const formatPrice = (price: number) => {
     return price.toLocaleString("pt-BR", {
       style: "currency",
@@ -35,7 +41,7 @@ const ProductCard = ({
 
   return (
     <Link
-      to={`/produto/${id}`}
+      to={productUrl}
       className="bg-card rounded-lg p-4 border border-transparent hover:border-border hover:shadow-xl transition-all duration-300 cursor-pointer block group"
     >
       {/* Image */}
