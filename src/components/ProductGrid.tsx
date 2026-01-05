@@ -41,10 +41,10 @@ const ProductGrid = ({ categoryFilter }: ProductGridProps) => {
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground hidden sm:inline">Ordenar por:</span>
           <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-36">
+            <SelectTrigger className="w-36 border-foreground/20 focus:ring-foreground">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-background border-border">
               <SelectItem value="relevance">Relevância</SelectItem>
               <SelectItem value="price-asc">Menor preço</SelectItem>
               <SelectItem value="price-desc">Maior preço</SelectItem>
@@ -78,9 +78,10 @@ const ProductGrid = ({ categoryFilter }: ProductGridProps) => {
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
           {sortedProducts.map((product, index) => (
-            <div key={product.id} style={{ animationDelay: `${index * 50}ms` }}>
+          <div key={product.id} style={{ animationDelay: `${index * 50}ms` }}>
               <ProductCard
                 id={product.id}
+                slug={product.slug}
                 image={product.images[0]}
                 name={product.name}
                 oldPrice={product.originalPrice}
