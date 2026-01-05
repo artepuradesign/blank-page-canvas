@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, Save, Package, Plus, Trash2, Loader2, ImagePlus, GripVertical } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -38,16 +39,7 @@ interface SpecInput {
   valor: string;
 }
 
-interface VariationInput {
-  id?: number;
-  cor: string;
-  cor_codigo: string;
-  capacidade: string;
-  estoque: number;
-  preco: string;
-}
-
-// Lista de modelos de iPhone
+// Modelos de iPhone disponíveis
 const IPHONE_MODELS = [
   "IPHONE 6", "IPHONE 6 PLUS", "IPHONE 6S", "IPHONE 6S PLUS",
   "IPHONE 7", "IPHONE 7 PLUS", "IPHONE 8", "IPHONE 8 PLUS",
@@ -58,10 +50,10 @@ const IPHONE_MODELS = [
   "IPHONE 14", "IPHONE 14 PLUS", "IPHONE 14 PRO", "IPHONE 14 PRO MAX",
   "IPHONE 15", "IPHONE 15 PLUS", "IPHONE 15 PRO", "IPHONE 15 PRO MAX",
   "IPHONE 16", "IPHONE 16 PLUS", "IPHONE 16 PRO", "IPHONE 16 PRO MAX",
-  "IPHONE SE 2020", "IPHONE SE 2022", "OUTROS"
+  "IPHONE SE 2020", "IPHONE SE 2022"
 ];
 
-// Lista de condições
+// Condições disponíveis
 const CONDITIONS = [
   { value: "novo", label: "Novo" },
   { value: "seminovo", label: "Seminovo" },
@@ -71,13 +63,11 @@ const CONDITIONS = [
   { value: "com_defeito", label: "Com defeito" }
 ];
 
-// Lista de capacidades
-const CAPACITIES = [
-  "64GB", "128GB", "256GB", "512GB", "1TB"
-];
+// Capacidades disponíveis
+const CAPACITIES = ["64GB", "128GB", "256GB", "512GB", "1TB"];
 
-// Lista de cores com códigos hex
-const COLORS: { name: string; code: string }[] = [
+// Cores disponíveis com códigos hex
+const COLORS = [
   { name: "Amarelo", code: "#FFD700" },
   { name: "Azul", code: "#007AFF" },
   { name: "Branco", code: "#FFFFFF" },
@@ -97,7 +87,7 @@ const COLORS: { name: string; code: string }[] = [
   { name: "Titânio Branco", code: "#F5F5F5" },
 ];
 
-// Lista de telas por modelo
+// Especificações de tela por modelo
 const DISPLAY_SPECS: Record<string, string> = {
   "IPHONE 6": "4.7\" Retina HD",
   "IPHONE 6 PLUS": "5.5\" Retina HD",
@@ -138,7 +128,7 @@ const DISPLAY_SPECS: Record<string, string> = {
   "IPHONE SE 2022": "4.7\" Retina HD",
 };
 
-// Lista de câmeras por modelo
+// Especificações de câmera por modelo
 const CAMERA_SPECS: Record<string, string> = {
   "IPHONE 6": "8MP",
   "IPHONE 6 PLUS": "8MP",
@@ -179,6 +169,32 @@ const CAMERA_SPECS: Record<string, string> = {
   "IPHONE SE 2022": "12MP",
 };
 
+// Chips por modelo
+const CHIP_SPECS: Record<string, string> = {
+  "IPHONE 6": "A8", "IPHONE 6 PLUS": "A8",
+  "IPHONE 6S": "A9", "IPHONE 6S PLUS": "A9",
+  "IPHONE 7": "A10 Fusion", "IPHONE 7 PLUS": "A10 Fusion",
+  "IPHONE 8": "A11 Bionic", "IPHONE 8 PLUS": "A11 Bionic",
+  "IPHONE X": "A11 Bionic",
+  "IPHONE XR": "A12 Bionic", "IPHONE XS": "A12 Bionic", "IPHONE XS MAX": "A12 Bionic",
+  "IPHONE 11": "A13 Bionic", "IPHONE 11 PRO": "A13 Bionic", "IPHONE 11 PRO MAX": "A13 Bionic",
+  "IPHONE 12": "A14 Bionic", "IPHONE 12 MINI": "A14 Bionic", "IPHONE 12 PRO": "A14 Bionic", "IPHONE 12 PRO MAX": "A14 Bionic",
+  "IPHONE 13": "A15 Bionic", "IPHONE 13 MINI": "A15 Bionic", "IPHONE 13 PRO": "A15 Bionic", "IPHONE 13 PRO MAX": "A15 Bionic",
+  "IPHONE 14": "A15 Bionic", "IPHONE 14 PLUS": "A15 Bionic", "IPHONE 14 PRO": "A16 Bionic", "IPHONE 14 PRO MAX": "A16 Bionic",
+  "IPHONE 15": "A16 Bionic", "IPHONE 15 PLUS": "A16 Bionic", "IPHONE 15 PRO": "A17 Pro", "IPHONE 15 PRO MAX": "A17 Pro",
+  "IPHONE 16": "A18", "IPHONE 16 PLUS": "A18", "IPHONE 16 PRO": "A18 Pro", "IPHONE 16 PRO MAX": "A18 Pro",
+  "IPHONE SE 2020": "A13 Bionic", "IPHONE SE 2022": "A15 Bionic",
+};
+
+// Interface para variação selecionada
+interface VariationSelection {
+  cor: string;
+  cor_codigo: string;
+  capacidade: string;
+  estoque: number;
+  preco: string;
+}
+
 const AdminProductForm = () => {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -189,6 +205,7 @@ const AdminProductForm = () => {
   const [categories, setCategories] = useState<AdminCategory[]>([]);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   
+  // Dados básicos do produto
   const [formData, setFormData] = useState({
     nome: "",
     sku: "",
@@ -209,13 +226,18 @@ const AdminProductForm = () => {
     ativo: true,
   });
 
+  // Seleção de cores e capacidades (checkboxes)
+  const [selectedColors, setSelectedColors] = useState<string[]>([]);
+  const [selectedCapacities, setSelectedCapacities] = useState<string[]>([]);
+  
+  // Variações geradas automaticamente
+  const [variations, setVariations] = useState<VariationSelection[]>([]);
+
   const [images, setImages] = useState<ImageInput[]>([
     { url: "", ordem: 0, principal: true }
   ]);
 
   const [specs, setSpecs] = useState<SpecInput[]>([]);
-  
-  const [variations, setVariations] = useState<VariationInput[]>([]);
 
   // Carregar categorias
   useEffect(() => {
@@ -249,18 +271,46 @@ const AdminProductForm = () => {
     }
   }, [navigate, isEditing, id]);
 
-  // Auto-preencher tela e câmera quando modelo muda
+  // Auto-preencher especificações quando modelo muda
   useEffect(() => {
-    if (formData.modelo && formData.modelo !== "OUTROS") {
-      const display = DISPLAY_SPECS[formData.modelo] || "";
-      const camera = CAMERA_SPECS[formData.modelo] || "";
+    if (formData.modelo) {
       setFormData(prev => ({
         ...prev,
-        tela: display,
-        camera: camera
+        tela: DISPLAY_SPECS[formData.modelo] || "",
+        camera: CAMERA_SPECS[formData.modelo] || "",
+        chip: CHIP_SPECS[formData.modelo] || ""
       }));
     }
   }, [formData.modelo]);
+
+  // Gerar variações quando cores ou capacidades mudam
+  useEffect(() => {
+    if (selectedColors.length > 0 && selectedCapacities.length > 0) {
+      const newVariations: VariationSelection[] = [];
+      
+      selectedColors.forEach(colorName => {
+        const color = COLORS.find(c => c.name === colorName);
+        selectedCapacities.forEach(capacity => {
+          // Verificar se já existe
+          const existing = variations.find(
+            v => v.cor === colorName && v.capacidade === capacity
+          );
+          
+          newVariations.push({
+            cor: colorName,
+            cor_codigo: color?.code || "#000000",
+            capacidade: capacity,
+            estoque: existing?.estoque ?? 0,
+            preco: existing?.preco ?? formData.preco
+          });
+        });
+      });
+      
+      setVariations(newVariations);
+    } else {
+      setVariations([]);
+    }
+  }, [selectedColors, selectedCapacities]);
 
   const loadProduct = async () => {
     try {
@@ -295,15 +345,22 @@ const AdminProductForm = () => {
         setSpecs(product.especificacoes);
       }
 
+      // Carregar variações existentes
       if (product.variacoes && product.variacoes.length > 0) {
-        setVariations(product.variacoes.map((v: any) => ({
-          id: v.id,
+        const loadedVariations = product.variacoes.map((v: any) => ({
           cor: v.cor || '',
           cor_codigo: v.cor_codigo || '',
           capacidade: v.capacidade || '',
           estoque: v.estoque || 0,
           preco: String(v.preco || '')
-        })));
+        }));
+        setVariations(loadedVariations);
+        
+        // Extrair cores e capacidades selecionadas
+        const colors = [...new Set(loadedVariations.map((v: VariationSelection) => v.cor).filter(Boolean))];
+        const capacities = [...new Set(loadedVariations.map((v: VariationSelection) => v.capacidade).filter(Boolean))];
+        setSelectedColors(colors);
+        setSelectedCapacities(capacities);
       }
     } catch (error) {
       console.error('Erro ao carregar produto:', error);
@@ -316,6 +373,31 @@ const AdminProductForm = () => {
 
   const handleChange = (field: string, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  // Toggle cor
+  const toggleColor = (colorName: string) => {
+    setSelectedColors(prev => 
+      prev.includes(colorName) 
+        ? prev.filter(c => c !== colorName)
+        : [...prev, colorName]
+    );
+  };
+
+  // Toggle capacidade
+  const toggleCapacity = (capacity: string) => {
+    setSelectedCapacities(prev => 
+      prev.includes(capacity) 
+        ? prev.filter(c => c !== capacity)
+        : [...prev, capacity]
+    );
+  };
+
+  // Atualizar variação
+  const updateVariation = (index: number, field: 'estoque' | 'preco', value: string | number) => {
+    const newVariations = [...variations];
+    (newVariations[index] as any)[field] = value;
+    setVariations(newVariations);
   };
 
   // Gerenciamento de imagens
@@ -360,30 +442,6 @@ const AdminProductForm = () => {
     setSpecs(newSpecs);
   };
 
-  // Gerenciamento de variações
-  const addVariation = () => {
-    setVariations([...variations, { cor: "", cor_codigo: "", capacidade: "", estoque: 0, preco: "" }]);
-  };
-
-  const removeVariation = (index: number) => {
-    setVariations(variations.filter((_, i) => i !== index));
-  };
-
-  const updateVariation = (index: number, field: keyof VariationInput, value: string | number) => {
-    const newVariations = [...variations];
-    (newVariations[index] as any)[field] = value;
-    
-    // Auto-preencher código da cor
-    if (field === 'cor') {
-      const color = COLORS.find(c => c.name === value);
-      if (color) {
-        newVariations[index].cor_codigo = color.code;
-      }
-    }
-    
-    setVariations(newVariations);
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -399,22 +457,14 @@ const AdminProductForm = () => {
     }
 
     const validSpecs = specs.filter(s => s.label.trim() && s.valor.trim());
-    
-    // Adicionar specs automáticas de tela e câmera
-    if (formData.tela && !validSpecs.find(s => s.label.toLowerCase() === 'tela')) {
-      validSpecs.push({ label: 'Tela', valor: formData.tela });
-    }
-    if (formData.camera && !validSpecs.find(s => s.label.toLowerCase() === 'câmera')) {
-      validSpecs.push({ label: 'Câmera', valor: formData.camera });
-    }
-    if (formData.chip && !validSpecs.find(s => s.label.toLowerCase() === 'chip')) {
-      validSpecs.push({ label: 'Chip', valor: formData.chip });
-    }
 
-    const validVariations = variations.filter(v => v.cor || v.capacidade).map(v => ({
-      ...v,
-      preco: Number(v.preco) || 0,
-      estoque: Number(v.estoque) || 0
+    // Preparar variações para envio
+    const validVariations = variations.map(v => ({
+      cor: v.cor,
+      cor_codigo: v.cor_codigo,
+      capacidade: v.capacidade,
+      estoque: Number(v.estoque) || 0,
+      preco: Number(v.preco) || Number(formData.preco) || 0
     }));
 
     try {
@@ -488,10 +538,10 @@ const AdminProductForm = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Package className="w-5 h-5" />
-                {isEditing ? "Editar Produto" : "Cadastrar Novo Produto"}
+                {isEditing ? "Editar Produto" : "Novo Produto"}
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2 md:col-span-2">
                   <Label htmlFor="nome">Nome do Produto *</Label>
@@ -499,7 +549,7 @@ const AdminProductForm = () => {
                     id="nome"
                     value={formData.nome}
                     onChange={(e) => handleChange("nome", e.target.value)}
-                    placeholder="Ex: iPhone 14 Pro Max 256GB"
+                    placeholder="Ex: iPhone 15 Pro Max"
                     required
                   />
                 </div>
@@ -510,7 +560,7 @@ const AdminProductForm = () => {
                     id="sku"
                     value={formData.sku}
                     onChange={(e) => handleChange("sku", e.target.value)}
-                    placeholder="Ex: IPH14PM-256-AZL"
+                    placeholder="Ex: IPH15PM-256"
                   />
                 </div>
 
@@ -534,7 +584,7 @@ const AdminProductForm = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="modelo">Modelo</Label>
+                  <Label htmlFor="modelo">Modelo do iPhone</Label>
                   <Select
                     value={formData.modelo}
                     onValueChange={(value) => handleChange("modelo", value)}
@@ -580,9 +630,19 @@ const AdminProductForm = () => {
                     placeholder="Ex: Bateria acima de 90%, sem marcas de uso"
                   />
                 </div>
+              </div>
+            </CardContent>
+          </Card>
 
+          {/* Preço e Estoque */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Preço e Estoque Base</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="preco">Preço de Venda (R$) *</Label>
+                  <Label htmlFor="preco">Preço Base (R$) *</Label>
                   <Input
                     id="preco"
                     type="number"
@@ -607,14 +667,13 @@ const AdminProductForm = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="estoque">Estoque *</Label>
+                  <Label htmlFor="estoque">Estoque Geral</Label>
                   <Input
                     id="estoque"
                     type="number"
                     value={formData.estoque}
                     onChange={(e) => handleChange("estoque", e.target.value)}
                     placeholder="0"
-                    required
                   />
                 </div>
 
@@ -632,148 +691,158 @@ const AdminProductForm = () => {
             </CardContent>
           </Card>
 
-          {/* Especificações Técnicas */}
+          {/* Especificações Técnicas (Auto-preenchidas) */}
           <Card>
             <CardHeader>
               <CardTitle>Especificações Técnicas</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="tela">Tela</Label>
+                  <Label>Tela</Label>
                   <Input
-                    id="tela"
                     value={formData.tela}
                     onChange={(e) => handleChange("tela", e.target.value)}
-                    placeholder='Ex: 6.1" Super Retina XDR'
+                    placeholder="Preenchido automaticamente"
                   />
                 </div>
-
                 <div className="space-y-2">
-                  <Label htmlFor="camera">Câmera</Label>
+                  <Label>Câmera</Label>
                   <Input
-                    id="camera"
                     value={formData.camera}
                     onChange={(e) => handleChange("camera", e.target.value)}
-                    placeholder="Ex: 48MP + 12MP + 12MP"
+                    placeholder="Preenchido automaticamente"
                   />
                 </div>
-
                 <div className="space-y-2">
-                  <Label htmlFor="chip">Chip</Label>
+                  <Label>Chip</Label>
                   <Input
-                    id="chip"
                     value={formData.chip}
                     onChange={(e) => handleChange("chip", e.target.value)}
-                    placeholder="Ex: A17 Pro"
+                    placeholder="Preenchido automaticamente"
                   />
                 </div>
               </div>
-
-              <p className="text-sm text-muted-foreground">
-                * Tela e Câmera são preenchidos automaticamente ao selecionar o modelo do iPhone.
+              <p className="text-sm text-muted-foreground mt-2">
+                Estes campos são preenchidos automaticamente ao selecionar o modelo do iPhone.
               </p>
             </CardContent>
           </Card>
 
-          {/* Variações de Cor e Capacidade */}
+          {/* Seleção de Cores */}
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>Variações (Cor/Capacidade)</CardTitle>
-              <Button type="button" variant="outline" size="sm" onClick={addVariation}>
-                <Plus className="w-4 h-4 mr-2" />
-                Adicionar Variação
-              </Button>
+            <CardHeader>
+              <CardTitle>Cores Disponíveis</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {variations.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  Nenhuma variação adicionada. Clique em "Adicionar Variação" para incluir cores e capacidades diferentes.
-                </p>
-              ) : (
-                variations.map((variation, index) => (
-                  <div key={index} className="grid grid-cols-1 md:grid-cols-5 gap-3 p-4 border rounded-lg">
-                    <div className="space-y-2">
-                      <Label>Cor</Label>
-                      <Select
-                        value={variation.cor}
-                        onValueChange={(value) => updateVariation(index, 'cor', value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-background">
-                          {COLORS.map((color) => (
-                            <SelectItem key={color.name} value={color.name}>
-                              <div className="flex items-center gap-2">
-                                <span
-                                  className="w-4 h-4 rounded border border-border"
-                                  style={{ backgroundColor: color.code }}
-                                />
-                                {color.name}
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Capacidade</Label>
-                      <Select
-                        value={variation.capacidade}
-                        onValueChange={(value) => updateVariation(index, 'capacidade', value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-background">
-                          {CAPACITIES.map((cap) => (
-                            <SelectItem key={cap} value={cap}>
-                              {cap}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Estoque</Label>
-                      <Input
-                        type="number"
-                        value={variation.estoque}
-                        onChange={(e) => updateVariation(index, 'estoque', Number(e.target.value))}
-                        placeholder="0"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Preço (R$)</Label>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        value={variation.preco}
-                        onChange={(e) => updateVariation(index, 'preco', e.target.value)}
-                        placeholder="Usar preço base"
-                      />
-                    </div>
-
-                    <div className="flex items-end">
-                      <Button 
-                        type="button"
-                        variant="ghost" 
-                        size="icon"
-                        className="text-destructive hover:text-destructive"
-                        onClick={() => removeVariation(index)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ))
-              )}
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                Selecione as cores disponíveis para este produto
+              </p>
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                {COLORS.map((color) => (
+                  <label
+                    key={color.name}
+                    className={`flex items-center gap-2 p-3 border rounded-lg cursor-pointer transition-colors ${
+                      selectedColors.includes(color.name)
+                        ? 'border-foreground bg-secondary'
+                        : 'border-border hover:border-muted-foreground'
+                    }`}
+                  >
+                    <Checkbox
+                      checked={selectedColors.includes(color.name)}
+                      onCheckedChange={() => toggleColor(color.name)}
+                    />
+                    <span
+                      className="w-5 h-5 rounded border border-border flex-shrink-0"
+                      style={{ backgroundColor: color.code }}
+                    />
+                    <span className="text-sm truncate">{color.name}</span>
+                  </label>
+                ))}
+              </div>
             </CardContent>
           </Card>
+
+          {/* Seleção de Capacidades */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Capacidades Disponíveis</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                Selecione as capacidades disponíveis para este produto
+              </p>
+              <div className="flex flex-wrap gap-3">
+                {CAPACITIES.map((capacity) => (
+                  <label
+                    key={capacity}
+                    className={`flex items-center gap-2 px-4 py-2 border rounded-lg cursor-pointer transition-colors ${
+                      selectedCapacities.includes(capacity)
+                        ? 'border-foreground bg-secondary'
+                        : 'border-border hover:border-muted-foreground'
+                    }`}
+                  >
+                    <Checkbox
+                      checked={selectedCapacities.includes(capacity)}
+                      onCheckedChange={() => toggleCapacity(capacity)}
+                    />
+                    <span className="font-medium">{capacity}</span>
+                  </label>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Variações Geradas */}
+          {variations.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Estoque por Variação</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Defina o estoque e preço para cada combinação de cor e capacidade
+                </p>
+                <div className="space-y-3">
+                  {variations.map((variation, index) => (
+                    <div key={`${variation.cor}-${variation.capacidade}`} className="flex items-center gap-4 p-3 border rounded-lg">
+                      <div className="flex items-center gap-2 min-w-[140px]">
+                        <span
+                          className="w-5 h-5 rounded border border-border flex-shrink-0"
+                          style={{ backgroundColor: variation.cor_codigo }}
+                        />
+                        <span className="text-sm font-medium">{variation.cor}</span>
+                      </div>
+                      <div className="min-w-[80px]">
+                        <span className="text-sm font-medium">{variation.capacidade}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Label className="text-sm">Estoque:</Label>
+                        <Input
+                          type="number"
+                          value={variation.estoque}
+                          onChange={(e) => updateVariation(index, 'estoque', e.target.value)}
+                          className="w-20"
+                          min="0"
+                        />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Label className="text-sm">Preço (R$):</Label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          value={variation.preco}
+                          onChange={(e) => updateVariation(index, 'preco', e.target.value)}
+                          className="w-28"
+                          placeholder={formData.preco || "Base"}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Descrições */}
           <Card>
@@ -832,7 +901,7 @@ const AdminProductForm = () => {
               </CardTitle>
               <Button type="button" variant="outline" size="sm" onClick={addImage}>
                 <Plus className="w-4 h-4 mr-2" />
-                Adicionar Imagem
+                Adicionar
               </Button>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -844,7 +913,7 @@ const AdminProductForm = () => {
                     <img 
                       src={image.url} 
                       alt={`Preview ${index + 1}`}
-                      className="w-20 h-20 object-cover rounded"
+                      className="w-16 h-16 object-cover rounded"
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = '/placeholder.svg';
                       }}
@@ -884,10 +953,6 @@ const AdminProductForm = () => {
                   )}
                 </div>
               ))}
-              
-              <p className="text-sm text-muted-foreground">
-                Cole URLs de imagens do produto. A imagem marcada como principal aparecerá na listagem.
-              </p>
             </CardContent>
           </Card>
 
@@ -903,7 +968,7 @@ const AdminProductForm = () => {
             <CardContent className="space-y-4">
               {specs.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-4">
-                  Nenhuma especificação adicional. Clique em "Adicionar" para incluir.
+                  Adicione especificações extras como Bateria, Acessórios, etc.
                 </p>
               ) : (
                 specs.map((spec, index) => (
@@ -935,18 +1000,23 @@ const AdminProductForm = () => {
             </CardContent>
           </Card>
 
-          {/* Botões de Ação */}
-          <div className="flex gap-4">
-            <Button type="submit" className="flex-1" disabled={saving}>
-              {saving ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              ) : (
-                <Save className="w-4 h-4 mr-2" />
-              )}
-              {isEditing ? "Salvar Alterações" : "Cadastrar Produto"}
-            </Button>
+          {/* Botão de Salvar */}
+          <div className="flex justify-end gap-4">
             <Button type="button" variant="outline" asChild>
               <Link to="/admin/produtos">Cancelar</Link>
+            </Button>
+            <Button type="submit" disabled={saving} className="min-w-[150px]">
+              {saving ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Salvando...
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4 mr-2" />
+                  {isEditing ? "Atualizar" : "Cadastrar"}
+                </>
+              )}
             </Button>
           </div>
         </form>
