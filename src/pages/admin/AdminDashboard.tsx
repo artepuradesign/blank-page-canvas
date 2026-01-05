@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,31 +19,44 @@ import Footer from "@/components/Footer";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {
     const token = localStorage.getItem("adminToken") || sessionStorage.getItem("adminToken");
-
+    
     if (!token) {
-      navigate("/admin/login");
-      return;
+      navigate("/admin/login", { replace: true });
+    } else {
+      setIsAuthenticated(true);
     }
   }, [navigate]);
 
-  // Buscar estatísticas
+  // Buscar estatísticas - só ativa quando autenticado
   const { data: stats, isLoading: loadingStats } = useQuery({
     queryKey: ["admin-stats"],
     queryFn: fetchAdminStats,
     staleTime: 2 * 60 * 1000, // 2 minutos
     retry: 2,
+    enabled: isAuthenticated === true,
   });
 
-  // Buscar pedidos recentes
+  // Buscar pedidos recentes - só ativa quando autenticado
   const { data: pedidosData, isLoading: loadingPedidos } = useQuery({
     queryKey: ["admin-pedidos-recentes"],
     queryFn: () => fetchAdminPedidos(5, 1),
     staleTime: 2 * 60 * 1000,
     retry: 2,
+    enabled: isAuthenticated === true,
   });
+
+  // Não renderiza nada enquanto verifica autenticação
+  if (isAuthenticated === null) {
+    return (
+      <div className="min-h-screen bg-secondary flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("pt-BR", {

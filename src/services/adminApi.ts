@@ -11,6 +11,7 @@ export interface AdminProduct {
   descricao_curta: string;
   categoria_id: number;
   categoria: string;
+  modelo?: string;
   condicao: string;
   condicao_descricao: string;
   preco: number;
@@ -18,10 +19,14 @@ export interface AdminProduct {
   desconto_percentual: number;
   estoque: number;
   garantia_meses: number;
+  tela?: string;
+  camera?: string;
+  chip?: string;
   destaque: boolean;
   ativo: boolean;
   imagens: { id?: number; url: string; ordem: number; principal: boolean }[];
   especificacoes: { id?: number; label: string; valor: string }[];
+  variacoes?: { id?: number; cor: string; cor_codigo: string; capacidade: string; estoque: number; preco: number }[];
   created_at: string;
   updated_at: string;
 }
