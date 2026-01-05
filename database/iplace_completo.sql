@@ -60,13 +60,17 @@ CREATE TABLE produtos (
     descricao TEXT,
     descricao_curta VARCHAR(500),
     categoria_id INT,
-    condicao ENUM('novo', 'seminovo', 'usado') DEFAULT 'seminovo',
+    modelo VARCHAR(50),
+    condicao ENUM('novo', 'seminovo', 'usado_excelente', 'usado_bom', 'recondicionado', 'com_defeito') DEFAULT 'seminovo',
     condicao_descricao VARCHAR(255),
     preco DECIMAL(10,2) NOT NULL,
     preco_original DECIMAL(10,2),
     desconto_percentual INT DEFAULT 0,
     estoque INT DEFAULT 0,
     garantia_meses INT DEFAULT 3,
+    tela VARCHAR(100),
+    camera VARCHAR(100),
+    chip VARCHAR(50),
     destaque TINYINT(1) DEFAULT 0,
     rating DECIMAL(2,1) DEFAULT 5.0,
     reviews INT DEFAULT 0,
@@ -207,20 +211,20 @@ INSERT INTO categorias (nome, slug, descricao, ordem) VALUES
 -- =====================================================
 -- DADOS: PRODUTOS
 -- =====================================================
-INSERT INTO produtos (sku, nome, slug, descricao, descricao_curta, categoria_id, condicao, condicao_descricao, preco, preco_original, desconto_percentual, estoque, garantia_meses, destaque, rating, reviews, parcelas) VALUES
-('IPH15PRO256', 'iPhone 15 Pro 256GB', 'iphone-15-pro-256gb', 'iPhone 15 Pro com chip A17 Pro, câmera de 48MP, Dynamic Island e corpo em titânio. Aparelho em excelente estado.', 'iPhone 15 Pro 256GB seminovo em excelente estado', 1, 'seminovo', 'Excelente - Sem marcas de uso', 6499.00, 7999.00, 19, 5, 6, 1, 4.9, 127, 12),
-('IPH14PLUS128', 'iPhone 14 Plus 128GB', 'iphone-14-plus-128gb', 'iPhone 14 Plus com tela de 6.7 polegadas, chip A15 Bionic e câmera dupla de 12MP.', 'iPhone 14 Plus 128GB seminovo', 1, 'seminovo', 'Muito Bom - Pequenas marcas', 4299.00, 5499.00, 22, 8, 6, 1, 4.7, 89, 12),
-('IPH13128', 'iPhone 13 128GB', 'iphone-13-128gb', 'iPhone 13 com chip A15 Bionic, câmera dupla de 12MP e 5G.', 'iPhone 13 128GB seminovo', 1, 'seminovo', 'Bom - Marcas leves de uso', 2999.00, 3999.00, 25, 12, 3, 0, 4.5, 234, 12),
-('IPH12128', 'iPhone 12 128GB', 'iphone-12-128gb', 'iPhone 12 com chip A14 Bionic, tela Super Retina XDR e 5G.', 'iPhone 12 128GB seminovo', 1, 'seminovo', 'Bom - Algumas marcas', 2199.00, 2999.00, 27, 15, 3, 0, 4.4, 312, 12),
-('IPADPRO11M2', 'iPad Pro 11" M2 256GB', 'ipad-pro-11-m2-256gb', 'iPad Pro 11 polegadas com chip M2, tela Liquid Retina XDR.', 'iPad Pro 11" M2 256GB seminovo', 2, 'seminovo', 'Excelente - Como novo', 6299.00, 7999.00, 21, 3, 6, 1, 4.8, 56, 12),
-('IPADAIR5256', 'iPad Air 5ª Geração 256GB', 'ipad-air-5-256gb', 'iPad Air com chip M1, tela Liquid Retina de 10.9".', 'iPad Air 5ª Geração 256GB seminovo', 2, 'seminovo', 'Muito Bom - Pequenas marcas', 4499.00, 5699.00, 21, 6, 6, 0, 4.6, 78, 12),
-('MBPROM2PRO14', 'MacBook Pro 14" M2 Pro 512GB', 'macbook-pro-14-m2-pro-512gb', 'MacBook Pro 14 polegadas com chip M2 Pro, 16GB RAM, SSD 512GB.', 'MacBook Pro 14" M2 Pro 512GB seminovo', 3, 'seminovo', 'Excelente - Pouquíssimo uso', 12499.00, 15999.00, 22, 2, 6, 1, 4.9, 34, 12),
-('MBAIRM2256', 'MacBook Air M2 256GB', 'macbook-air-m2-256gb', 'MacBook Air com chip M2, 8GB RAM, SSD 256GB.', 'MacBook Air M2 256GB seminovo', 3, 'seminovo', 'Muito Bom - Marcas leves', 7499.00, 9499.00, 21, 4, 6, 0, 4.7, 92, 12),
-('AWS9GPS45', 'Apple Watch Series 9 GPS 45mm', 'apple-watch-series-9-gps-45mm', 'Apple Watch Series 9 com GPS, caixa de alumínio e pulseira esportiva.', 'Apple Watch Series 9 GPS 45mm seminovo', 4, 'seminovo', 'Excelente - Sem marcas', 2899.00, 3699.00, 22, 7, 6, 1, 4.8, 45, 12),
-('AWULTRA2', 'Apple Watch Ultra 2', 'apple-watch-ultra-2', 'Apple Watch Ultra 2 com GPS + Celular, caixa de titânio 49mm.', 'Apple Watch Ultra 2 seminovo', 4, 'seminovo', 'Excelente - Como novo', 5499.00, 6999.00, 21, 2, 6, 1, 4.9, 28, 12),
-('APPMAX', 'AirPods Max', 'airpods-max', 'AirPods Max com cancelamento de ruído ativo e áudio espacial.', 'AirPods Max seminovo', 5, 'seminovo', 'Muito Bom - Pequenas marcas', 2999.00, 4299.00, 30, 4, 3, 0, 4.6, 67, 12),
-('APPPRO2', 'AirPods Pro 2ª Geração', 'airpods-pro-2-geracao', 'AirPods Pro 2ª geração com cancelamento de ruído e estojo MagSafe.', 'AirPods Pro 2ª Geração seminovo', 5, 'seminovo', 'Excelente - Pouquíssimo uso', 1499.00, 1899.00, 21, 10, 3, 1, 4.8, 156, 12),
-('MAGSAFE15W', 'Carregador MagSafe 15W', 'carregador-magsafe-15w', 'Carregador MagSafe original Apple com potência de 15W.', 'Carregador MagSafe 15W Original', 6, 'novo', 'Novo - Lacrado', 299.00, 399.00, 25, 25, 12, 0, 4.9, 89, 12);
+INSERT INTO produtos (sku, nome, slug, descricao, descricao_curta, categoria_id, modelo, condicao, condicao_descricao, preco, preco_original, desconto_percentual, estoque, garantia_meses, tela, camera, chip, destaque, rating, reviews, parcelas) VALUES
+('IPH15PRO256', 'iPhone 15 Pro 256GB', 'iphone-15-pro-256gb', 'iPhone 15 Pro com chip A17 Pro, câmera de 48MP, Dynamic Island e corpo em titânio. Aparelho em excelente estado.', 'iPhone 15 Pro 256GB seminovo em excelente estado', 1, 'IPHONE 15 PRO', 'seminovo', 'Excelente - Sem marcas de uso', 6499.00, 7999.00, 19, 5, 6, '6.1" Super Retina XDR ProMotion', '48MP + 12MP + 12MP + LiDAR', 'A17 Pro', 1, 4.9, 127, 12),
+('IPH14PLUS128', 'iPhone 14 Plus 128GB', 'iphone-14-plus-128gb', 'iPhone 14 Plus com tela de 6.7 polegadas, chip A15 Bionic e câmera dupla de 12MP.', 'iPhone 14 Plus 128GB seminovo', 1, 'IPHONE 14 PLUS', 'seminovo', 'Muito Bom - Pequenas marcas', 4299.00, 5499.00, 22, 8, 6, '6.7" Super Retina XDR', '12MP + 12MP', 'A15 Bionic', 1, 4.7, 89, 12),
+('IPH13128', 'iPhone 13 128GB', 'iphone-13-128gb', 'iPhone 13 com chip A15 Bionic, câmera dupla de 12MP e 5G.', 'iPhone 13 128GB seminovo', 1, 'IPHONE 13', 'usado_bom', 'Bom - Marcas leves de uso', 2999.00, 3999.00, 25, 12, 3, '6.1" Super Retina XDR', '12MP + 12MP', 'A15 Bionic', 0, 4.5, 234, 12),
+('IPH12128', 'iPhone 12 128GB', 'iphone-12-128gb', 'iPhone 12 com chip A14 Bionic, tela Super Retina XDR e 5G.', 'iPhone 12 128GB seminovo', 1, 'IPHONE 12', 'usado_bom', 'Bom - Algumas marcas', 2199.00, 2999.00, 27, 15, 3, '6.1" Super Retina XDR', '12MP + 12MP', 'A14 Bionic', 0, 4.4, 312, 12),
+('IPADPRO11M2', 'iPad Pro 11" M2 256GB', 'ipad-pro-11-m2-256gb', 'iPad Pro 11 polegadas com chip M2, tela Liquid Retina XDR.', 'iPad Pro 11" M2 256GB seminovo', 2, NULL, 'seminovo', 'Excelente - Como novo', 6299.00, 7999.00, 21, 3, 6, '11" Liquid Retina XDR', '12MP + 10MP + LiDAR', 'M2', 1, 4.8, 56, 12),
+('IPADAIR5256', 'iPad Air 5ª Geração 256GB', 'ipad-air-5-256gb', 'iPad Air com chip M1, tela Liquid Retina de 10.9".', 'iPad Air 5ª Geração 256GB seminovo', 2, NULL, 'seminovo', 'Muito Bom - Pequenas marcas', 4499.00, 5699.00, 21, 6, 6, '10.9" Liquid Retina', '12MP', 'M1', 0, 4.6, 78, 12),
+('MBPROM2PRO14', 'MacBook Pro 14" M2 Pro 512GB', 'macbook-pro-14-m2-pro-512gb', 'MacBook Pro 14 polegadas com chip M2 Pro, 16GB RAM, SSD 512GB.', 'MacBook Pro 14" M2 Pro 512GB seminovo', 3, NULL, 'seminovo', 'Excelente - Pouquíssimo uso', 12499.00, 15999.00, 22, 2, 6, '14.2" Liquid Retina XDR', NULL, 'M2 Pro', 1, 4.9, 34, 12),
+('MBAIRM2256', 'MacBook Air M2 256GB', 'macbook-air-m2-256gb', 'MacBook Air com chip M2, 8GB RAM, SSD 256GB.', 'MacBook Air M2 256GB seminovo', 3, NULL, 'seminovo', 'Muito Bom - Marcas leves', 7499.00, 9499.00, 21, 4, 6, '13.6" Liquid Retina', NULL, 'M2', 0, 4.7, 92, 12),
+('AWS9GPS45', 'Apple Watch Series 9 GPS 45mm', 'apple-watch-series-9-gps-45mm', 'Apple Watch Series 9 com GPS, caixa de alumínio e pulseira esportiva.', 'Apple Watch Series 9 GPS 45mm seminovo', 4, NULL, 'seminovo', 'Excelente - Sem marcas', 2899.00, 3699.00, 22, 7, 6, '45mm OLED Retina', NULL, 'S9 SiP', 1, 4.8, 45, 12),
+('AWULTRA2', 'Apple Watch Ultra 2', 'apple-watch-ultra-2', 'Apple Watch Ultra 2 com GPS + Celular, caixa de titânio 49mm.', 'Apple Watch Ultra 2 seminovo', 4, NULL, 'seminovo', 'Excelente - Como novo', 5499.00, 6999.00, 21, 2, 6, '49mm OLED Retina', NULL, 'S9 SiP', 1, 4.9, 28, 12),
+('APPMAX', 'AirPods Max', 'airpods-max', 'AirPods Max com cancelamento de ruído ativo e áudio espacial.', 'AirPods Max seminovo', 5, NULL, 'seminovo', 'Muito Bom - Pequenas marcas', 2999.00, 4299.00, 30, 4, 3, NULL, NULL, 'H1', 0, 4.6, 67, 12),
+('APPPRO2', 'AirPods Pro 2ª Geração', 'airpods-pro-2-geracao', 'AirPods Pro 2ª geração com cancelamento de ruído e estojo MagSafe.', 'AirPods Pro 2ª Geração seminovo', 5, NULL, 'seminovo', 'Excelente - Pouquíssimo uso', 1499.00, 1899.00, 21, 10, 3, NULL, NULL, 'H2', 1, 4.8, 156, 12),
+('MAGSAFE15W', 'Carregador MagSafe 15W', 'carregador-magsafe-15w', 'Carregador MagSafe original Apple com potência de 15W.', 'Carregador MagSafe 15W Original', 6, NULL, 'novo', 'Novo - Lacrado', 299.00, 399.00, 25, 25, 12, NULL, NULL, NULL, 0, 4.9, 89, 12);
 
 -- =====================================================
 -- DADOS: IMAGENS DOS PRODUTOS
